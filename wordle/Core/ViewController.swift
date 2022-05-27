@@ -22,6 +22,7 @@ class ViewController: UIViewController {
     private func addChildren() {
         addChild(keyboardViewController)
         keyboardViewController.didMove(toParent: self)
+        keyboardViewController.delegate = self
         keyboardViewController.view.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(keyboardViewController.view)
         
@@ -48,3 +49,10 @@ class ViewController: UIViewController {
     }
 }
 
+extension ViewController: KeyboarControllerDelegate {
+    func keyboardViewController(_ vc: KeyboardViewController, didTapKey letter: Character) {
+        print(letter)
+    }
+    
+    
+}
