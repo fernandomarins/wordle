@@ -7,11 +7,16 @@
 
 import UIKit
 
+protocol BoardViewControllerDataSource: AnyObject {
+    var currentGuesses: [[Character?]] { get }
+    func boxColor(at indexPath: IndexPath) -> UIColor?
+}
+
 class BoardViewController:  UIViewController {
     
-    var guesses: [[Character]] = Array(repeating: Array(repeating: "B", count: 5), count: 6)
-    
-    let collectionView: UICollectionView = {
+    weak var dataSource: BoardViewControllerDataSource?
+        
+    private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.minimumInteritemSpacing = 4
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -37,6 +42,10 @@ class BoardViewController:  UIViewController {
         ])
 
     }
+    
+    func reloadData() {
+        collectionView.reloadData()
+    }
 }
 
 extension BoardViewController: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
@@ -44,17 +53,24 @@ extension BoardViewController: UICollectionViewDelegate, UICollectionViewDelegat
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: KeyCell.identifier,
                                                             for: indexPath) as? KeyCell else { fatalError() }
 
-        cell.backgroundColor = nil
+        cell.backgroundColor = dataSource?.boxColor(at: indexPath)
         cell.layer.borderWidth = 1
         cell.layer.borderColor = UIColor.systemGray3.cgColor
+        
+        let guesses = dataSource?.currentGuesses ?? []
+        if let letter = guesses[indexPath.section][indexPath.row] {
+            cell.configure(with: letter)
+        }
+        
         return cell
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return guesses.count
+        return dataSource?.currentGuesses.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        let guesses = dataSource?.currentGuesses ?? []
         return guesses[section].count
     }
     
